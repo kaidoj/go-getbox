@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"sync"
 )
 
 var (
@@ -31,32 +32,25 @@ type Render struct {
 }
 
 func (f *Fetcher) ProjectsToSync() {
+	defer wg.Done()
 	nrCores := f.request.Config.GetInt("nr_of_cores")
 
-	in := make(chan Project)
-	out := make(chan Project)
-
-	projects := []Project
+	projects := make(chan Project)
 
 	for i := 1; i <= nrCores; i++ {
-		fmt.Printf("ProjectToSync %d", i)
-		project := f.ProjectToSync()
-		go f.FetchAndMoveProject(project, syncing)
+		fmt.Printf("Run fetcher %d", i)
+		wg.Add(1)
+		go f.FetchProject(projects)
 	}
 
-	for o := range out {
-		fmt.Println("called out")
-		categoriesList = append(categoriesList, o)
-
-		if lenCategories == len(categoriesList) {
-			close(out)
-		}
+	for project := range projects {
+		fmt.Printf("Fetched project %s", project.Name)
 	}
 }
 
-func (f *Fetcher) FetchAndMoveProject(project *Project, syncing chan) {
-
-	project := ProjectToSync()
+func (f *Fetcher) FetchProject(projects chan Project) {
+	project := f.ProjectToSync()
+	projects <- project
 }
 
 //ProjectsToSync returns projects that are ready for sync
@@ -72,6 +66,7 @@ func (f *Fetcher) ProjectToSync() Project {
 	err = json.Unmarshal(res, &project)
 
 	if err != nil {
+		fmt.Println("No more renders to download")
 		log.Fatalf("Couldn't parse json in request %v.[ERROR] - %s", endpoint, err)
 	}
 

@@ -30,9 +30,8 @@ type Request struct {
 func (r *Request) Get(endpoint string) ([]byte, error) {
 	r.endpoint = endpoint
 	req, err := http.NewRequest(method, r.getURL(), nil)
-	authHeader := r.AuthHeader()
-	//fmt.Println(authHeader)
-	req.Header.Set("Authorization", authHeader)
+
+	req.Header.Set("Authorization", r.AuthHeader())
 	req.Header.Set("X-Version", r.Config.GetString("api_version"))
 	req.Header.Set("X-Getbox-Id", r.Config.GetString("getbox_id"))
 	req.Header.Set("Date", r.curDate())
