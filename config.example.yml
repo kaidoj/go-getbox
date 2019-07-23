@@ -1,0 +1,9 @@
+host: exmaplehost.com
+schema: http
+port: 80
+api_url: api/exampleurl
+api_version: v2
+auth_access_key: 
+auth_secret_key: 
+getbox_id:
+nr_of_cores:
