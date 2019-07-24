@@ -1,7 +1,6 @@
 package pbx
 
 import (
-	"fmt"
 	"log"
 
 	"github.com/spf13/viper"
@@ -17,14 +16,11 @@ func (gbox *Getbox) Run() *Getbox {
 
 	gbox.isNrCoresSet()
 
-	r := &Request{gbox.Config, ""}
-	var f Fetch
-	f = &Fetcher{r}
-	project := f.ProjectToSync()
+	r := &Request{}
+	r.Config = gbox.Config
 
-	fmt.Printf("Name is %s; Id is %s", project.Name, project.Id)
-	fmt.Printf("\r\nStatus is %d", project.Render.Status)
-	fmt.Printf("\r\nURL is %s", project.Render.URL)
+	m := &Move{r}
+	f := &Fetch{r, m, 0}
 
 	f.ProjectsToSync()
 

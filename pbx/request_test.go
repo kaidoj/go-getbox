@@ -2,7 +2,12 @@ package pbx
 
 import (
 	"encoding/hex"
+	"fmt"
 	"getbox/config"
+	"net/http"
+	"net/http/httptest"
+	"net/url"
+	"strings"
 	"testing"
 )
 
@@ -37,11 +42,93 @@ func TestHmacHash(t *testing.T) {
 
 func TestGetUrl(t *testing.T) {
 	config := config.Init("../tests")
-	r := &Request{config, ""}
+	r := &Request{}
+	r.Config = config
 	res := r.getURL()
 	v := "https://localhost/api/route//"
 
 	if res != v {
 		t.Errorf("want %v; got %v", v, res)
 	}
+}
+
+func TestSign(t *testing.T) {
+	config := config.Init("../tests")
+	r := &Request{}
+	r.Config = config
+	r.date = "2016-01-01T12:00:00+00:00"
+	res := r.Sign()
+	v := "Xg+SwsEGV0KfdJDYRCd773ZJQZFDNQG/7JGLBtJVN8U="
+
+	if res != v {
+		t.Errorf("want %v; got %v", v, res)
+	}
+}
+
+func TestAuthHeader(t *testing.T) {
+	config := config.Init("../tests")
+	r := &Request{}
+	r.Config = config
+	r.date = "2016-01-01T12:00:00+00:00"
+	res := r.AuthHeader()
+	v := "Signature ApiKey=\"asd123\", Algorithm=\"hmac-sha256\", SignedHeaders=\"date;x-version\", Signature=\"Xg+SwsEGV0KfdJDYRCd773ZJQZFDNQG/7JGLBtJVN8U=\""
+
+	if res != v {
+		t.Errorf("want %v; got %v", v, res)
+	}
+}
+
+func TestApiUrl(t *testing.T) {
+	config := config.Init("../tests")
+	r := &Request{}
+	r.Config = config
+	res := r.apiURL()
+	v := "/api/route//"
+
+	if res != v {
+		t.Errorf("want %v; got %v", v, res)
+	}
+}
+
+func TestDownloadFile(t *testing.T) {
+	r := &Request{}
+	err := r.DownloadFile("../tests/downloaded", "http://localhost")
+	if err != nil {
+		t.Errorf("Couldn't download file %v", err)
+	}
+}
+
+func TestGet(t *testing.T) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		fmt.Fprintln(w, `{"fake response"}`)
+	}))
+	defer ts.Close()
+
+	config := config.Init("../tests")
+	config.Set("host", extractHost(ts.URL))
+	config.Set("Schema", "http")
+	r := &Request{}
+	r.Config = config
+
+	body, err := r.Get("asd")
+	if err != nil {
+		t.Errorf("Couldn't make get request to %v", ts.URL)
+	}
+
+	v := `{"fake response"}`
+	res := string(body)
+	if strings.TrimRight(res, "\n") != v {
+		t.Errorf("want %v; got %v", v, res)
+	}
+
+}
+
+func extractHost(s string) string {
+	u, err := url.Parse(s)
+	if err != nil {
+		panic(err)
+	}
+
+	return u.Host
 }

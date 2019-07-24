@@ -7,3 +7,6 @@ auth_access_key:
 auth_secret_key: 
 getbox_id:
 nr_of_cores:
+getbox_path: /var/www/getbox/
+temp_path: tmp/
+finished_path: finished/
