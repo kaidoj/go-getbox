@@ -5,7 +5,8 @@ api_version: v2
 auth_access_key: asd123
 auth_secret_key: asdsecret123
 getbox_id: test123
-nr_of_cores: 8
+nr_of_cores: 1
 getbox_path: 
 temp_path: tests/getbox/tmp/
 finished_path: tests/getbox/finished/
+fetchers_interval: 5

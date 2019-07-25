@@ -3,6 +3,7 @@ package pbx
 import (
 	"fmt"
 	"getbox/utils"
+	"io"
 	"log"
 	"os"
 	"path"
@@ -10,7 +11,7 @@ import (
 )
 
 type Mover interface {
-	MoveFileToFinished(project *Project) ([]string, error)
+	MoveFileToFinished(project *Project) error
 	Download(url string) (string, error)
 }
 
@@ -18,37 +19,39 @@ type Move struct {
 	request Requester
 }
 
-//MoveFileToFinished downloads and unzips render file
-func (m *Move) MoveFileToFinished(project *Project) ([]string, error) {
+// MoveFileToFinished downloads and unzips render file
+func (m *Move) MoveFileToFinished(project *Project) error {
 
 	log.Printf("Start downloading file from %s", project.Render.URL)
 
 	tempFile, err := m.Download(project.Render.URL)
 	if err != nil {
-		fmt.Printf("Couldn't download file %v.\n[ERROR] - %v", project.Render.URL, err)
-		return nil, err
+		fmt.Printf("Couldn't download file %v.\n[ERROR] - %v\n", project.Render.URL, err)
+		return err
 	}
 
-	log.Printf("Downloaded file %s", tempFile)
+	log.Printf("Downloaded file %s\n", tempFile)
 
 	finishedPath := m.getboxPath(m.request.GetConfig().GetString("finished_path") + project.Id)
-	files, err := utils.Unzip(tempFile, finishedPath)
+	err = utils.Untar(tempFile, finishedPath)
 	if err != nil {
-		log.Printf("Couldn't unzip file %v.\n[ERROR] - %v", tempFile, err)
-		return nil, err
+		if err != io.EOF {
+			log.Printf("Couldn't untar file %v.\n[ERROR] - %v\n", tempFile, err)
+			return err
+		}
 	}
 
-	log.Printf("Unzipped file %s and moved to finished %s", tempFile, finishedPath)
+	log.Printf("Unpacked file %s and moved to finished %s\n", tempFile, finishedPath)
 
-	return files, nil
+	return nil
 }
 
-//Download fetches file from url and returns temp local file path
+// Download fetches file from url and returns temp local file path
 func (m *Move) Download(url string) (string, error) {
 
 	filename := m.extractFilename(url)
 	downloadPath := m.getboxPath(m.request.GetConfig().GetString("temp_path"))
-	err := m.request.DownloadFile(downloadPath, url)
+	err := m.request.DownloadFile(downloadPath+filename, url)
 	return downloadPath + filename, err
 }
 
@@ -59,8 +62,6 @@ func (m *Move) extractFilename(url string) string {
 func (m *Move) getboxPath(directoryPath string) string {
 	var getbox string
 	getbox = m.request.GetConfig().GetString("getbox_path")
-	newpath := filepath.Join(".", "public")
-	fmt.Println(newpath)
 
 	if getbox == "" {
 		dir, err := os.Getwd()
@@ -73,7 +74,7 @@ func (m *Move) getboxPath(directoryPath string) string {
 
 	path := getbox + directoryPath
 	if _, err := os.Stat(path); os.IsNotExist(err) {
-		os.Mkdir(path, os.ModeDir)
+		os.MkdirAll(path, os.ModeDir)
 	}
 
 	return path

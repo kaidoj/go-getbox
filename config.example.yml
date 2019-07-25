@@ -6,7 +6,9 @@ api_version: v2
 auth_access_key: 
 auth_secret_key: 
 getbox_id:
-nr_of_cores:
+nr_of_cores: #amount of cores/fetchers you would like to use
 getbox_path: /var/www/getbox/
 temp_path: tmp/
 finished_path: finished/
+fetchers_interval: 30 #fetchers run interval
+log_to_file: #bool true or false
