@@ -42,6 +42,9 @@ func TestHmacHash(t *testing.T) {
 
 func TestGetUrl(t *testing.T) {
 	config := config.Init("../tests")
+	config.Set("host", "localhost")
+	config.Set("port", 80)
+	config.Set("schema", "https")
 	r := &Request{}
 	r.Config = config
 	res := r.getURL()
