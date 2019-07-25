@@ -1,13 +1,18 @@
 # PBX Getbox renders download app
 
-This script checks and downloads render from printbox server to local server.
+App checks and downloads render files from printbox server to local server and unpacks.
+App is using CPU cores so the fetchers run concurrently. So downloading and unpacking render files is alot faster.
 
 ## Usage
+
+Install [Go](https://golang.org/doc/install)
+Install [Docker](https://docs.docker.com/install/)
+Install [Docker Compose](https://docs.docker.com/compose/install/)
 
 If you have docker installed in server then use ```docker-compose up -d```
 This runs app forever and checking. App is doing interval checks after time set in config.
 
-Running only once you need server to have go installed and then use ```go run main.go```
+Running only once you need server to have go installed and then use ```go run main.go run_once```
 
 ## Config setup
 

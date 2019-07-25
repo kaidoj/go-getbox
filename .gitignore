@@ -4,3 +4,4 @@ getbox/
 downloaded
 !tests/config.yml
 *.log
+build/
