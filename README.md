@@ -36,6 +36,10 @@ fetchers_interval: 10 #seconds interval you would like getbox app run fetchers
 
 Run tests ```go test ./...```
 
+## Build
+
+```env GOOS=linux go build -o build/go-getbox```
+
 ## Todo
 
     - Set status SYNCED for getbox project
