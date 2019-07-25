@@ -1,4 +1,4 @@
-module getbox
+module go-getbox
 
 go 1.12
 

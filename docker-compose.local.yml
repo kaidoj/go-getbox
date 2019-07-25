@@ -1,7 +1,7 @@
 version: "3.3"
 
 services:
-  getbox:
+  go-getbox:
     build: ./
     volumes:
       - ./downloads:/var/www/getbox
