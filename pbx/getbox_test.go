@@ -1,7 +1,7 @@
 package pbx
 
 import (
-	"getbox/config"
+	"go-getbox/config"
 	"testing"
 )
 

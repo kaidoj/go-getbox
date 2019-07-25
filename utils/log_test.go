@@ -2,7 +2,7 @@ package utils
 
 import (
 	"fmt"
-	"getbox/config"
+	"go-getbox/config"
 	"log"
 	"os"
 	"strings"

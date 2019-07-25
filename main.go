@@ -1,9 +1,9 @@
 package main
 
 import (
-	"getbox/config"
-	"getbox/pbx"
-	"getbox/utils"
+	"go-getbox/config"
+	"go-getbox/pbx"
+	"go-getbox/utils"
 	"log"
 )
 

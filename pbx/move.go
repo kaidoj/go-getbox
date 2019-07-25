@@ -2,7 +2,7 @@ package pbx
 
 import (
 	"fmt"
-	"getbox/utils"
+	"go-getbox/utils"
 	"io"
 	"log"
 	"os"

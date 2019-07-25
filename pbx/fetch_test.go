@@ -2,7 +2,7 @@ package pbx
 
 import (
 	"fmt"
-	"getbox/config"
+	"go-getbox/config"
 	"net/http"
 	"net/http/httptest"
 	"testing"

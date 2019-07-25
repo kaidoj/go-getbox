@@ -4,5 +4,5 @@ services:
   getbox:
     build: ./
     volumes:
-      - ./downloads:/var/www/getbox
-      - ./logs:/var/log/getbox
+      - /var/www/getbox:/var/www/getbox
+      - /var/log/getbox:/var/log/getbox

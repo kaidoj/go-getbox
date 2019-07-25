@@ -3,7 +3,7 @@ package pbx
 import (
 	"encoding/hex"
 	"fmt"
-	"getbox/config"
+	"go-getbox/config"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
