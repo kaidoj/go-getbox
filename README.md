@@ -29,3 +29,7 @@ fetchers_interval: 10 #seconds interval you would like getbox app run fetchers
 ## Development
 
 Run tests ```go test ./...```
+
+## Todo
+
+    - Set status SYNCED for getbox project
