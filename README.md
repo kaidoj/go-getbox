@@ -5,6 +5,8 @@ App is using CPU cores so the fetchers run concurrently. So downloading and unpa
 
 ## Usage
 
+Setup config first! Copy ```config.example.yml``` and rename to ```config.yml```
+
 Install [Docker](https://docs.docker.com/install/)  
 Install [Docker Compose](https://docs.docker.com/compose/install/)  
 
@@ -18,7 +20,7 @@ Running only once you need server to have go installed and then use ```go run ma
 ## Config setup
 
 ```yml
-host: qa-fotomeened-pbx2.getprintbox.com
+host: examplehost
 schema: https
 api_url: api/getbox
 api_version: v2
@@ -30,6 +32,8 @@ getbox_path: /var/www/getbox/ #location of getbox files root
 temp_path: tmp/ #temporary files dir. Unzipped versions of renders will be downloaded here
 finished_path: finished/ #unzipped versions of files will be placed here
 fetchers_interval: 10 #seconds interval you would like getbox app run fetchers
+log_to_file: true
+log_file: /var/log/getbox/
 ```
 
 ## Development
