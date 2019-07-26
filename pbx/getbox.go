@@ -18,9 +18,8 @@ func NewGetbox(config *viper.Viper) *Getbox {
 
 	getbox := &Getbox{}
 	getbox.Config = config
-	r := &Request{}
-	r.Config = config
-	m := &Move{r}
+	r := NewRequest(config)
+	m := NewMove(r)
 	getbox.fetch = NewFetcher(r, m)
 
 	if len(os.Args) <= 1 {

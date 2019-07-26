@@ -19,6 +19,11 @@ type Move struct {
 	request Requester
 }
 
+// NewMover starts new Move instances
+func NewMove(request Requester) Mover {
+	return &Move{request}
+}
+
 // FileToFinished downloads and unzips render file
 func (m *Move) FileToFinished(project *Project) error {
 
