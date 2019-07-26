@@ -78,7 +78,7 @@ func (f *Fetch) FetchAndMoveProject(projects chan Project) error {
 		return err
 	}
 
-	err = f.move.MoveFileToFinished(&project)
+	err = f.move.FileToFinished(&project)
 	if err != nil {
 		return err
 	}

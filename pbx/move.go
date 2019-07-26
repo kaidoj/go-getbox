@@ -11,7 +11,7 @@ import (
 )
 
 type Mover interface {
-	MoveFileToFinished(project *Project) error
+	FileToFinished(project *Project) error
 	Download(url string) (string, error)
 }
 
@@ -19,8 +19,8 @@ type Move struct {
 	request Requester
 }
 
-// MoveFileToFinished downloads and unzips render file
-func (m *Move) MoveFileToFinished(project *Project) error {
+// FileToFinished downloads and unzips render file
+func (m *Move) FileToFinished(project *Project) error {
 
 	log.Printf("Start downloading file from %s", project.Render.URL)
 

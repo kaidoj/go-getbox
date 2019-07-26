@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-func TestMoveFileToFinished(t *testing.T) {
+func TestFileToFinished(t *testing.T) {
 
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		http.Handle("/", http.FileServer(http.Dir("../tests/files")))
@@ -24,7 +24,7 @@ func TestMoveFileToFinished(t *testing.T) {
 	p.Render = render
 
 	m := &Move{r}
-	err := m.MoveFileToFinished(p)
+	err := m.FileToFinished(p)
 
 	if err != nil {
 		t.Errorf("Couln't move file.[ERROR] - %v", err)
