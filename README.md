@@ -48,7 +48,3 @@ Run tests ```go test ./...```
 ## Build
 
 ```env GOOS=linux go build -o build/go-getbox```
-
-## Todo
-
-    - Set status SYNCED for getbox project

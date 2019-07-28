@@ -21,3 +21,7 @@ First release
 ### Changed
 
 - Refactor all the code. Everything is more readable and more performant.
+
+### Added
+
+- Project getbox status will be set SUCCESS after sync
