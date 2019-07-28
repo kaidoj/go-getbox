@@ -38,6 +38,9 @@ log_file: /var/log/getbox/
 
 ## Development
 
+- downloads directory is for local run where files are downloaded
+- tests directory contains all test data and config used for testing
+
 Run tests ```go test ./...```
 
 ## Build

@@ -8,28 +8,22 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+
+	"github.com/spf13/viper"
 )
 
-type Mover interface {
-	FileToFinished(project *Project) error
-	Download(url string) (string, error)
-}
-
-type Move struct {
+type File struct {
 	request Requester
+	config  *viper.Viper
 }
 
-// NewMover starts new Move instances
-func NewMove(request Requester) Mover {
-	return &Move{request}
-}
+// DownloadAndFinish downloads file, untars and moves to finished directory
+func DownloadAndFinish(project *Project, request Requester, config *viper.Viper) error {
 
-// FileToFinished downloads and unzips render file
-func (m *Move) FileToFinished(project *Project) error {
-
+	file := &File{request, config}
 	log.Printf("Start downloading file from %s", project.Render.URL)
 
-	tempFile, err := m.Download(project.Render.URL)
+	tempFile, err := file.download(project.Render.URL)
 	if err != nil {
 		fmt.Printf("Couldn't download file %v.\n[ERROR] - %v\n", project.Render.URL, err)
 		return err
@@ -37,7 +31,7 @@ func (m *Move) FileToFinished(project *Project) error {
 
 	log.Printf("Downloaded file %s\n", tempFile)
 
-	finishedPath := m.getboxPath(m.request.GetConfig().GetString("finished_path") + project.Id)
+	finishedPath := file.getboxPath(config.GetString("finished_path") + project.Id)
 	err = utils.Untar(tempFile, finishedPath)
 	if err != nil {
 		if err != io.EOF {
@@ -52,21 +46,21 @@ func (m *Move) FileToFinished(project *Project) error {
 }
 
 // Download fetches file from url and returns temp local file path
-func (m *Move) Download(url string) (string, error) {
+func (f *File) download(url string) (string, error) {
 
-	filename := m.extractFilename(url)
-	downloadPath := m.getboxPath(m.request.GetConfig().GetString("temp_path"))
-	err := m.request.DownloadFile(downloadPath+filename, url)
+	filename := f.extractFilename(url)
+	downloadPath := f.getboxPath(f.config.GetString("temp_path"))
+	err := f.request.DownloadFile(downloadPath+filename, url)
 	return downloadPath + filename, err
 }
 
-func (m *Move) extractFilename(url string) string {
+func (f *File) extractFilename(url string) string {
 	return path.Base(url)
 }
 
-func (m *Move) getboxPath(directoryPath string) string {
+func (f *File) getboxPath(directoryPath string) string {
 	var getbox string
-	getbox = m.request.GetConfig().GetString("getbox_path")
+	getbox = f.config.GetString("getbox_path")
 
 	if getbox == "" {
 		dir, err := os.Getwd()

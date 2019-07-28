@@ -1,10 +1,12 @@
 package pbx
 
 import (
+	"bytes"
 	"crypto/hmac"
 	"crypto/sha256"
 	"encoding/base64"
 	"encoding/hex"
+	"encoding/json"
 	"io"
 	"io/ioutil"
 	"log"
@@ -17,13 +19,13 @@ import (
 )
 
 const (
-	method        = "GET"
 	signedHeaders = "date;x-version"
 	algorithm     = "hmac-sha256"
 )
 
 type Requester interface {
 	Get(endpoint string) ([]byte, error)
+	Post(endpoint string, payload map[string]string) ([]byte, error)
 	DownloadFile(filepath string, url string) error
 	GetConfig() *viper.Viper
 }
@@ -32,19 +34,23 @@ type Request struct {
 	Config   *viper.Viper
 	endpoint string
 	date     string
+	method   string
+	payload  string
 }
 
 // NewRequest starts new request instance
 func NewRequest(config *viper.Viper) Requester {
-	return &Request{config, "", ""}
+	return &Request{config, "", "", http.MethodGet, ""}
 }
 
-// Get fetches results from remote url as string
-func (r *Request) Get(endpoint string) ([]byte, error) {
+func (r *Request) do(method string, endpoint string) ([]byte, error) {
 	r.endpoint = endpoint
 	r.date = r.curDate()
-	req, err := http.NewRequest(method, r.getURL(), nil)
+	r.method = method
 
+	req, err := http.NewRequest(r.method, r.getURL(), bytes.NewBuffer([]byte(r.payload)))
+
+	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", r.AuthHeader())
 	req.Header.Set("X-Version", r.Config.GetString("api_version"))
 	req.Header.Set("X-Getbox-Id", r.Config.GetString("getbox_id"))
@@ -65,8 +71,26 @@ func (r *Request) Get(endpoint string) ([]byte, error) {
 	}
 
 	body, err := ioutil.ReadAll(resp.Body)
-	//log.Println(string([]byte(body)))
+
 	return body, err
+}
+
+// Get fetches results from remote url as string
+func (r *Request) Get(endpoint string) ([]byte, error) {
+	r.payload = ""
+	return r.do(http.MethodGet, endpoint)
+}
+
+// Post send post request to given endpoint
+func (r *Request) Post(endpoint string, payload map[string]string) ([]byte, error) {
+	requestBody, err := json.Marshal(payload)
+	if err != nil {
+		log.Printf("Couldn't create body for POST request.\n[ERROR] - %v", err)
+		return nil, err
+	}
+
+	r.payload = string(requestBody)
+	return r.do(http.MethodPost, endpoint)
 }
 
 // AuthHeader creates authentication header for request
@@ -85,14 +109,14 @@ func (r *Request) AuthHeader() string {
 func (r *Request) Sign() string {
 	var sign strings.Builder
 
-	sign.WriteString(method + "\n")
+	sign.WriteString(r.method + "\n")
 	sign.WriteString(r.apiURL() + "\n")
 	sign.WriteString("\n")
 	sign.WriteString("date:" + r.date + "\n")
 	sign.WriteString("x-version:" + r.Config.GetString("api_version") + "\n")
 	sign.WriteString("\n")
 	sign.WriteString(signedHeaders + "\n")
-	sign.WriteString(r.hashPayload(""))
+	sign.WriteString(r.hashPayload(r.payload))
 
 	return base64.StdEncoding.EncodeToString(
 		r.hmacHash(sign.String(), r.Config.GetString("auth_secret_key")))
@@ -111,7 +135,7 @@ func (r *Request) hashPayload(payload string) string {
 	return hex.EncodeToString(h[:])
 }
 
-// creates hmac has
+// creates hmac hash
 func (r *Request) hmacHash(sign string, secret string) []byte {
 	h := hmac.New(sha256.New, []byte(secret))
 	h.Write([]byte(sign))

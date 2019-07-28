@@ -11,5 +11,5 @@ getbox_path: /var/www/getbox/
 temp_path: tmp/
 finished_path: finished/
 fetchers_interval: 30 #fetchers run interval
-log_to_file: #bool true or false
+log_to_file: true #bool true or false
 log_file: /var/log/getbox/ #log file location

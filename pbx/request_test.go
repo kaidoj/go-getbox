@@ -4,6 +4,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"go-getbox/config"
+	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -61,7 +62,7 @@ func TestSign(t *testing.T) {
 	r.Config = config
 	r.date = "2016-01-01T12:00:00+00:00"
 	res := r.Sign()
-	v := "Xg+SwsEGV0KfdJDYRCd773ZJQZFDNQG/7JGLBtJVN8U="
+	v := "YImoDg17jDshYnVl9b6LcHnhATwgdiJwwx/qhs9Lr6c="
 
 	if res != v {
 		t.Errorf("want %v; got %v", v, res)
@@ -74,7 +75,7 @@ func TestAuthHeader(t *testing.T) {
 	r.Config = config
 	r.date = "2016-01-01T12:00:00+00:00"
 	res := r.AuthHeader()
-	v := "Signature ApiKey=\"asd123\", Algorithm=\"hmac-sha256\", SignedHeaders=\"date;x-version\", Signature=\"Xg+SwsEGV0KfdJDYRCd773ZJQZFDNQG/7JGLBtJVN8U=\""
+	v := "Signature ApiKey=\"asd123\", Algorithm=\"hmac-sha256\", SignedHeaders=\"date;x-version\", Signature=\"YImoDg17jDshYnVl9b6LcHnhATwgdiJwwx/qhs9Lr6c=\""
 
 	if res != v {
 		t.Errorf("want %v; got %v", v, res)
@@ -110,13 +111,50 @@ func TestGet(t *testing.T) {
 
 	config := config.Init("../tests")
 	config.Set("host", extractHost(ts.URL))
-	config.Set("Schema", "http")
+	config.Set("schema", "http")
 	r := &Request{}
 	r.Config = config
 
 	body, err := r.Get("asd")
 	if err != nil {
 		t.Errorf("Couldn't make get request to %v", ts.URL)
+	}
+
+	v := `{"fake response"}`
+	res := string(body)
+	if strings.TrimRight(res, "\n") != v {
+		t.Errorf("want %v; got %v", v, res)
+	}
+}
+
+func TestPost(t *testing.T) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != "POST" {
+			t.Errorf("Expected \"POST\" request, got \"%s\"", r.Method)
+		}
+		body, _ := ioutil.ReadAll(r.Body)
+		resp := string(body)
+		if !strings.Contains(resp, "status") {
+			t.Errorf("Request body doesn't contain status")
+		}
+		w.Header().Set("Content-Type", "application/json")
+		fmt.Fprintln(w, `{"fake response"}`)
+	}))
+	defer ts.Close()
+
+	config := config.Init("../tests")
+	config.Set("host", extractHost(ts.URL))
+	config.Set("schema", "http")
+	r := &Request{}
+	r.Config = config
+
+	payload := map[string]string{
+		"status": "SUCCESS",
+	}
+
+	body, err := r.Post("post-test", payload)
+	if err != nil {
+		t.Errorf("Couldn't make post request to %v", ts.URL)
 	}
 
 	v := `{"fake response"}`

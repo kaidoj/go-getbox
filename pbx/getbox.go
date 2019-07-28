@@ -1,6 +1,7 @@
 package pbx
 
 import (
+	"errors"
 	"log"
 	"os"
 	"time"
@@ -10,7 +11,6 @@ import (
 
 type Getbox struct {
 	Config *viper.Viper
-	fetch  Fetcher
 }
 
 //NewGetbox starts new getbox instance
@@ -18,9 +18,6 @@ func NewGetbox(config *viper.Viper) *Getbox {
 
 	getbox := &Getbox{}
 	getbox.Config = config
-	r := NewRequest(config)
-	m := NewMove(r)
-	getbox.fetch = NewFetcher(r, m)
 
 	if len(os.Args) <= 1 {
 		getbox.Run()
@@ -37,20 +34,25 @@ func NewGetbox(config *viper.Viper) *Getbox {
 }
 
 //Run getbox forever
-func (gbox *Getbox) Run() {
-	gbox.fetch.ProjectsToSync()
+func (gbox *Getbox) Run() error {
+	Sync(gbox.Config)
 	ms := gbox.Config.GetInt("fetchers_interval") * 1000
 	for range time.Tick(time.Duration(ms) * time.Millisecond) {
-		gbox.fetch.ProjectsToSync()
+		res := Sync(gbox.Config)
+		if !res {
+			return errors.New("Sync failed")
+		}
 	}
+
+	return nil
 }
 
 //RunOnce getbox
-func (gbox *Getbox) RunOnce() *Getbox {
-	if gbox.fetch.ProjectsToSync() {
+func (gbox *Getbox) RunOnce() error {
+	if Sync(gbox.Config) {
 		os.Exit(1)
 	}
-	return gbox
+	return errors.New("Run once sync failed")
 }
 
 //IsNrCoresSet checks if number of cores is set in config
