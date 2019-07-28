@@ -25,3 +25,4 @@ First release
 ### Added
 
 - Project getbox status will be set SUCCESS after sync
+- info.json file is now written to finished directory

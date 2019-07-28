@@ -11,9 +11,10 @@ const (
 )
 
 type Project struct {
-	Id     string
-	Name   string
-	Render Render
+	Id      string
+	Name    string
+	RawJSON []byte
+	Render  Render
 }
 
 type Render struct {
@@ -36,6 +37,8 @@ func Next(request Requester) (*Project, error) {
 	if err != nil {
 		return project, err
 	}
+
+	project.RawJSON = res
 
 	return project, nil
 }

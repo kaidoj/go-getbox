@@ -5,6 +5,7 @@ import (
 	"go-getbox/config"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"testing"
 )
 
@@ -31,5 +32,25 @@ func TestDownloadAndFinish(t *testing.T) {
 	err := DownloadAndFinish(project, r, config)
 	if err != nil {
 		t.Errorf("Download and finish failed")
+	}
+}
+
+func TestSave(t *testing.T) {
+	config := config.Init("../tests")
+	project := &Project{}
+	project.Id = "123"
+	project.Name = "Test"
+	project.RawJSON = []byte("{testjson}")
+
+	file := &File{}
+	file.config = config
+	finishedPath := config.GetString("finished_path") + project.Id + "/"
+	filePath := file.getboxPath(finishedPath) + jsonFilename
+	err := file.save(project, filePath)
+	if err != nil {
+		t.Errorf("Couldn't write file %v", filePath)
+	}
+	if _, err := os.Stat(filePath); os.IsNotExist(err) {
+		t.Errorf("File %v not found", filePath)
 	}
 }

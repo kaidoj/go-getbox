@@ -4,12 +4,17 @@ import (
 	"fmt"
 	"go-getbox/utils"
 	"io"
+	"io/ioutil"
 	"log"
 	"os"
 	"path"
 	"path/filepath"
 
 	"github.com/spf13/viper"
+)
+
+const (
+	jsonFilename = "info.json"
 )
 
 type File struct {
@@ -41,6 +46,14 @@ func DownloadAndFinish(project *Project, request Requester, config *viper.Viper)
 	}
 
 	log.Printf("Unpacked file %s and moved to finished %s\n", tempFile, finishedPath)
+
+	filePath := finishedPath + "/" + jsonFilename
+	err = file.save(project, filePath)
+	if err != nil {
+		log.Printf("Couldn't write file %v", filePath)
+	}
+
+	log.Printf("Wrote file %v", filePath)
 
 	return nil
 }
@@ -77,4 +90,9 @@ func (f *File) getboxPath(directoryPath string) string {
 	}
 
 	return path
+}
+
+func (f *File) save(project *Project, filename string) error {
+	err := ioutil.WriteFile(filename, project.RawJSON, 0644)
+	return err
 }
