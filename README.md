@@ -3,6 +3,8 @@
 App checks and downloads render files from printbox server to local server and unpacks.
 App is using CPU cores so the fetchers run concurrently. So downloading and unpacking render files is alot faster.
 
+Check [changelog](https://github.com/kaidoj/go-getbox/CHANGELOG.md) for changes
+
 ## Usage
 
 Setup config first! Copy ```config.example.yml``` and rename to ```config.yml```
