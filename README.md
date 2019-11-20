@@ -1,7 +1,7 @@
 # PBX Getbox renders download app
 
 App checks and downloads render files from printbox server to local server and unpacks.
-App is using CPU cores so the fetchers run concurrently. So downloading and unpacking render files is alot faster.
+App is using CPU threads so the fetchers run concurrently. So downloading and unpacking render files is alot faster.
 
 **Check changelog for changes**
 
